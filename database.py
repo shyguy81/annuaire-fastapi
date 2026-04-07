@@ -3,14 +3,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/contacts.db")
-
-# Create data directory if it doesn't exist
-os.makedirs("./data", exist_ok=True)
+DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://annuaire_user:annuaire_password@localhost:3306/annuaire_contacts")
 
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
+    pool_size=10,
+    max_overflow=20,
+    pool_pre_ping=True
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

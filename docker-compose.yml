@@ -1,12 +1,41 @@
 services:
+  mariadb:
+    image: mariadb:11.2
+    container_name: annuaire-mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: annuaire_contacts
+      MYSQL_USER: annuaire_user
+      MYSQL_PASSWORD: annuaire_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
   backend:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: annuaire-backend
+    depends_on:
+      mariadb:
+        condition: service_healthy
     environment:
       - LOG_LEVEL=INFO
-      - DATABASE_URL=sqlite:///./data/contacts.db
+      - DATABASE_URL=mysql+pymysql://annuaire_user:annuaire_password@mariadb:3306/annuaire_contacts
     ports:
       - "8000:8000"
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  mariadb_data:

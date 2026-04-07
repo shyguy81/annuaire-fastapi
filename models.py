@@ -12,12 +12,12 @@ Base = declarative_base()
 class ContactDB(Base):
     __tablename__ = "contacts"
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    nom = Column(String, nullable=False, index=True)
-    email = Column(String, nullable=False, unique=True, index=True)
-    telephone = Column(String, nullable=True)
-    adresse = Column(String, nullable=True)
-    organisation = Column(String, nullable=True)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    nom = Column(String(255), nullable=False, index=True)
+    email = Column(String(255), nullable=False, unique=True, index=True)
+    telephone = Column(String(20), nullable=True)
+    adresse = Column(String(500), nullable=True)
+    organisation = Column(String(255), nullable=True)
     tags = Column(JSON, default=list)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
