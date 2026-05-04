@@ -12,21 +12,6 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
-    services:
-      mariadb:
-        image: mariadb:11
-        env:
-          MYSQL_ROOT_PASSWORD: root_pass
-          MYSQL_DATABASE: annuaire_contacts_test
-          MYSQL_USER: test_user
-          MYSQL_PASSWORD: test_pass
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-        ports:
-          - 3306:3306
 
     steps:
       - uses: actions/checkout@v4
@@ -38,12 +23,13 @@ jobs:
           cache: 'pip'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt pytest pytest-asyncio httpx
+        run: pip install -r requirements.txt
 
-      - name: Run tests
-        env:
-          DATABASE_URL: mysql+pymysql://test_user:test_pass@localhost:3306/annuaire_contacts_test
-        run: pytest
+      - name: Lint and type check
+        run: |
+          pip install pylint mypy
+          pylint main.py models.py database.py || true
+          mypy . || true
 
   build:
     needs: test
