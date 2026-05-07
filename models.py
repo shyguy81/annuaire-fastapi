@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_serializer
 from sqlalchemy import Column, String, DateTime, JSON, func
 from sqlalchemy.ext.declarative import declarative_base
 import uuid
@@ -54,3 +54,8 @@ class ContactResponse(BaseModel):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+    @field_serializer('created_at', 'updated_at')
+    def serialize_datetime(self, value: datetime) -> str | None:
+        """Sérialiser les datetimes en ISO format pour JSON"""
+        return value.isoformat() if value else None
