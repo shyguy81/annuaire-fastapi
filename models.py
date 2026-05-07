@@ -49,7 +49,7 @@ class ContactResponse(BaseModel):
     telephone: Optional[str]
     adresse: Optional[str]
     organisation: Optional[str]
-    tags: list[str]
+    tags: Optional[list[str]] = []
     created_at: datetime
     updated_at: datetime
 
