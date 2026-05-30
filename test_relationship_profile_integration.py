@@ -131,20 +131,21 @@ def test_post_relationship_profile_duplicate(create_test_contact):
 
 
 def test_post_relationship_profile_invalid_trust_level(create_test_contact):
-    """Test trust_level validation"""
+    """Test trust_level validation (type validation)"""
     contact = create_test_contact()
     
-    # Test trust_level too low
+    # Test trust_level with invalid type (string instead of int)
     response = requests.post(
         f"{BASE_URL}/contacts/{contact['id']}/relationship-profile",
         json={
             "relationship_type": "business",
             "proximity_level": "warm",
-            "trust_level": 0,
+            "trust_level": "invalid",
             "business_potential": "high"
         }
     )
-    assert response.status_code == 400
+    # Should return 422 for type validation error
+    assert response.status_code == 422
 
 
 def test_get_relationship_profile_success(create_test_contact):

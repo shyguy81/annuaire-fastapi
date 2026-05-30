@@ -183,12 +183,18 @@ def test_get_interactions_pagination(create_test_contact):
 
 
 def test_get_interactions_max_limit(create_test_contact):
-    """Test that limit is clamped to 1000"""
+    """Test that limit is validated (max 1000)"""
     contact = create_test_contact()
     
-    # Request with limit > 1000
+    # Request with limit > 1000 should be rejected (422 validation error)
     response = requests.get(
         f"{BASE_URL}/contacts/{contact['id']}/interactions?limit=5000"
+    )
+    assert response.status_code == 422
+    
+    # Request with limit = 1000 should succeed
+    response = requests.get(
+        f"{BASE_URL}/contacts/{contact['id']}/interactions?limit=1000"
     )
     assert response.status_code == 200
 
