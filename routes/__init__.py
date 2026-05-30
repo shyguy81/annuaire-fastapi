@@ -7,6 +7,7 @@ from .contacts import register_contact_routes
 from .relationship_profiles import register_relationship_profile_routes
 from .interactions import register_interaction_routes
 from .actions import register_action_routes
+from .dashboard import register_dashboard_routes
 
 
 def register_all_routes(app: FastAPI):
@@ -15,3 +16,4 @@ def register_all_routes(app: FastAPI):
     register_relationship_profile_routes(app)
     register_interaction_routes(app)
     register_action_routes(app)
+    register_dashboard_routes(app)
