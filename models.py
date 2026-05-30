@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 from enum import Enum
-from pydantic import BaseModel, EmailStr, field_serializer
+from pydantic import BaseModel, EmailStr, field_serializer, ConfigDict
 from sqlalchemy import Column, String, DateTime, JSON, func, Integer, ForeignKey, Enum as SQLEnum, Date
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
@@ -12,6 +12,7 @@ Base = declarative_base()
 
 # ===== Enums =====
 class RelationshipType(str, Enum):
+    """Type of relationship with the contact: spouse, family member, business contact, mentor, friend, or acquaintance"""
     SPOUSE = "spouse"
     FAMILY = "family"
     BUSINESS = "business"
@@ -21,6 +22,7 @@ class RelationshipType(str, Enum):
 
 
 class ProximityLevel(str, Enum):
+    """Relationship closeness level: cold (no relation), warm (initial contact), active (ongoing engagement), close (strong bond)"""
     COLD = "cold"
     WARM = "warm"
     ACTIVE = "active"
@@ -28,12 +30,14 @@ class ProximityLevel(str, Enum):
 
 
 class BusinessPotential(str, Enum):
+    """Business opportunity potential: low, medium, or high"""
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
 
 
 class InteractionType(str, Enum):
+    """Type of interaction with the contact: call, email, meeting, message, or other"""
     CALL = "call"
     EMAIL = "email"
     MEETING = "meeting"
@@ -42,6 +46,7 @@ class InteractionType(str, Enum):
 
 
 class ActionType(str, Enum):
+    """Type of action to take: followup, relance (follow-up reminder), candidature (job application), email, call, or meeting"""
     FOLLOWUP = "followup"
     RELANCE = "relance"
     CANDIDATURE = "candidature"
@@ -51,6 +56,7 @@ class ActionType(str, Enum):
 
 
 class ActionStatus(str, Enum):
+    """Status of the action: todo (pending), in_progress (being worked on), completed, or cancelled"""
     TODO = "todo"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -58,6 +64,7 @@ class ActionStatus(str, Enum):
 
 
 class Priority(str, Enum):
+    """Priority level: low, medium, or high"""
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -133,6 +140,7 @@ class RelationshipActionDB(Base):
 
 # ===== Pydantic Schemas =====
 class ContactCreate(BaseModel):
+    """Create a new contact"""
     nom: str
     email: EmailStr
     telephone: Optional[str] = None
@@ -140,8 +148,22 @@ class ContactCreate(BaseModel):
     organisation: Optional[str] = None
     tags: Optional[list[str]] = []
 
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "nom": "Jean Dupont",
+                "email": "jean.dupont@example.com",
+                "telephone": "+33612345678",
+                "adresse": "123 Rue de Paris, 75001 Paris",
+                "organisation": "Acme Corp",
+                "tags": ["important", "vip"]
+            }
+        }
+    )
+
 
 class ContactUpdate(BaseModel):
+    """Update an existing contact (all fields optional)"""
     nom: Optional[str] = None
     email: Optional[EmailStr] = None
     telephone: Optional[str] = None
@@ -151,6 +173,7 @@ class ContactUpdate(BaseModel):
 
 
 class ContactResponse(BaseModel):
+    """Contact response with all fields and timestamps"""
     id: str
     nom: str
     email: str
@@ -173,13 +196,26 @@ class ContactResponse(BaseModel):
 
 # RelationshipProfile Schemas
 class RelationshipProfileCreate(BaseModel):
+    """Create a relationship profile for a contact"""
     relationship_type: RelationshipType
     proximity_level: ProximityLevel
     trust_level: int
     business_potential: BusinessPotential
 
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "relationship_type": "business",
+                "proximity_level": "warm",
+                "trust_level": 4,
+                "business_potential": "high"
+            }
+        }
+    )
+
 
 class RelationshipProfileUpdate(BaseModel):
+    """Update a relationship profile (all fields optional)"""
     relationship_type: Optional[RelationshipType] = None
     proximity_level: Optional[ProximityLevel] = None
     trust_level: Optional[int] = None
@@ -187,6 +223,7 @@ class RelationshipProfileUpdate(BaseModel):
 
 
 class RelationshipProfileResponse(BaseModel):
+    """Relationship profile response with all fields and timestamps"""
     id: str
     contact_id: str
     relationship_type: RelationshipType
@@ -207,18 +244,31 @@ class RelationshipProfileResponse(BaseModel):
 
 # Interaction Schemas
 class InteractionCreate(BaseModel):
+    """Create a new interaction with a contact"""
     interaction_type: InteractionType
     interaction_date: Optional[datetime] = None
     notes: Optional[str] = None
 
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "interaction_type": "email",
+                "interaction_date": "2026-05-30T10:30:00",
+                "notes": "Discussed project timeline and deliverables"
+            }
+        }
+    )
+
 
 class InteractionUpdate(BaseModel):
+    """Update an interaction (all fields optional)"""
     interaction_type: Optional[InteractionType] = None
     interaction_date: Optional[datetime] = None
     notes: Optional[str] = None
 
 
 class InteractionResponse(BaseModel):
+    """Interaction response with all fields and timestamps"""
     id: str
     contact_id: str
     interaction_type: InteractionType
@@ -238,13 +288,26 @@ class InteractionResponse(BaseModel):
 
 # RelationshipAction Schemas
 class RelationshipActionCreate(BaseModel):
+    """Create a relationship action (task/reminder)"""
     action_type: ActionType
     priority: Priority
     status: ActionStatus
     due_date: Optional[datetime] = None
 
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "action_type": "followup",
+                "priority": "high",
+                "status": "todo",
+                "due_date": "2026-06-15T17:00:00"
+            }
+        }
+    )
+
 
 class RelationshipActionUpdate(BaseModel):
+    """Update a relationship action (all fields optional)"""
     action_type: Optional[ActionType] = None
     priority: Optional[Priority] = None
     status: Optional[ActionStatus] = None
@@ -253,6 +316,7 @@ class RelationshipActionUpdate(BaseModel):
 
 
 class RelationshipActionResponse(BaseModel):
+    """Relationship action response with all fields and timestamps"""
     id: str
     contact_id: str
     action_type: ActionType

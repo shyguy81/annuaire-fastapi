@@ -16,7 +16,24 @@ def register_relationship_profile_routes(app: FastAPI):
 
     @app.post("/contacts/{contact_id}/relationship-profile", response_model=RelationshipProfileResponse, status_code=status.HTTP_201_CREATED)
     def create_relationship_profile(contact_id: str, profile: RelationshipProfileCreate, db: Session = Depends(get_db)):
-        """Créer un profil de relation pour un contact"""
+        """
+        Create a relationship profile for a contact.
+        
+        A contact can have at most one relationship profile. This endpoint stores relationship metadata including:
+        - Relationship type (spouse, family, business, mentor, friend, acquaintance)
+        - Proximity level (cold, warm, active, close) - how close/engaged the relationship is
+        - Trust level (numeric) - trust score for the contact
+        - Business potential (low, medium, high) - business opportunity assessment
+        
+        **Parameters:**
+        - contact_id: UUID of the contact (must exist)
+        - profile: Relationship profile data
+        
+        **Responses:**
+        - 201: Profile created successfully
+        - 404: Contact not found
+        - 409: Contact already has a relationship profile
+        """
         # Vérifier que le contact existe
         contact = db.query(ContactDB).filter(ContactDB.id == contact_id).first()
         if not contact:
@@ -45,7 +62,18 @@ def register_relationship_profile_routes(app: FastAPI):
 
     @app.get("/contacts/{contact_id}/relationship-profile", response_model=RelationshipProfileResponse)
     def get_relationship_profile(contact_id: str, db: Session = Depends(get_db)):
-        """Récupérer le profil de relation d'un contact"""
+        """
+        Retrieve the relationship profile for a contact.
+        
+        Each contact can have at most one relationship profile. This endpoint retrieves all relationship metadata.
+        
+        **Parameters:**
+        - contact_id: UUID of the contact
+        
+        **Responses:**
+        - 200: Profile found and returned
+        - 404: Contact not found or has no profile
+        """
         profile = db.query(RelationshipProfileDB).filter(RelationshipProfileDB.contact_id == contact_id).first()
         if not profile:
             raise HTTPException(
@@ -56,7 +84,20 @@ def register_relationship_profile_routes(app: FastAPI):
 
     @app.patch("/contacts/{contact_id}/relationship-profile", response_model=RelationshipProfileResponse)
     def update_relationship_profile(contact_id: str, profile_update: RelationshipProfileUpdate, db: Session = Depends(get_db)):
-        """Mettre à jour le profil de relation d'un contact"""
+        """
+        Update the relationship profile for a contact.
+        
+        All fields are optional. Only provided fields will be updated. This allows partial updates to the profile.
+        
+        **Parameters:**
+        - contact_id: UUID of the contact
+        - profile_update: Fields to update (all optional)
+        
+        **Responses:**
+        - 200: Profile updated successfully
+        - 404: Contact not found or has no profile
+        - 400: Invalid field values (e.g., invalid enum values)
+        """
         db_profile = db.query(RelationshipProfileDB).filter(RelationshipProfileDB.contact_id == contact_id).first()
         if not db_profile:
             raise HTTPException(

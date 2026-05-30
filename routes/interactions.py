@@ -18,7 +18,19 @@ def register_interaction_routes(app: FastAPI):
 
     @app.post("/contacts/{contact_id}/interactions", response_model=InteractionResponse, status_code=status.HTTP_201_CREATED)
     def create_interaction(contact_id: str, interaction: InteractionCreate, db: Session = Depends(get_db)):
-        """Créer une nouvelle interaction pour un contact"""
+        """
+        Create a new interaction record for a contact.
+        
+        Records an interaction (call, email, meeting, message, or other) with a contact. Useful for tracking communication history.
+        
+        **Parameters:**
+        - contact_id: UUID of the contact
+        - interaction: Interaction data (type is required, date defaults to now if not provided)
+        
+        **Responses:**
+        - 201: Interaction created successfully
+        - 404: Contact not found
+        """
         # Vérifier que le contact existe
         contact = db.query(ContactDB).filter(ContactDB.id == contact_id).first()
         if not contact:
@@ -40,13 +52,29 @@ def register_interaction_routes(app: FastAPI):
     @app.get("/contacts/{contact_id}/interactions")
     def list_interactions(
         contact_id: str,
-        skip: int = Query(0, ge=0),
-        limit: int = Query(100, ge=1, le=1000),
-        type_filter: str = Query(None, alias="type"),
-        since: str = Query(None),
+        skip: int = Query(0, ge=0, description="Number of records to skip for pagination"),
+        limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return (max 1000)"),
+        type_filter: str = Query(None, alias="type", description="Filter by interaction type (call, email, meeting, message, other)"),
+        since: str = Query(None, description="Filter interactions on or after this date (YYYY-MM-DD)"),
         db: Session = Depends(get_db)
     ):
-        """Lister les interactions d'un contact avec filtres et pagination"""
+        """
+        List all interactions for a contact with optional filtering and pagination.
+        
+        Returns a paginated list of interaction records. Supports filtering by interaction type and date range.
+        
+        **Parameters:**
+        - contact_id: UUID of the contact
+        - skip: Number of records to skip (default 0)
+        - limit: Maximum records to return (default 100, max 1000)
+        - type: Filter by interaction type (call, email, meeting, message, other)
+        - since: Filter interactions on or after date (format: YYYY-MM-DD)
+        
+        **Responses:**
+        - 200: Interactions list returned with pagination metadata
+        - 404: Contact not found
+        - 400: Invalid filter values
+        """
         # Vérifier que le contact existe
         contact = db.query(ContactDB).filter(ContactDB.id == contact_id).first()
         if not contact:

@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class DashboardResponse(BaseModel):
-    """Dashboard response schema"""
+    """Dashboard response with RAP system metrics"""
     due_today: int
     overdue: int
     active_relations: int
@@ -44,7 +44,23 @@ def register_dashboard_routes(app: FastAPI):
 
     @app.get("/rap/dashboard", response_model=DashboardResponse)
     def get_dashboard(db: Session = Depends(get_db)):
-        """Get RAP system dashboard with aggregated metrics"""
+        """
+        Get RAP system dashboard with aggregated metrics.
+        
+        Returns system-wide statistics about relationship actions, profiles, and interactions.
+        All metrics are calculated in real-time using optimized SQL aggregations.
+        
+        **Metrics returned:**
+        - due_today: Count of actions with 'todo' or 'in_progress' status due today
+        - overdue: Count of actions with 'todo' or 'in_progress' status due before today
+        - active_relations: Count of distinct contacts with 'warm', 'active', or 'close' proximity levels
+        - high_potential: Count of distinct contacts with 'high' business potential
+        - recent_interactions: Count of interactions from the last 7 days
+        - timestamp: Current time in ISO 8601 format (UTC)
+        
+        **Responses:**
+        - 200: Dashboard metrics returned successfully
+        """
         today = date.today()
         seven_days_ago = today - timedelta(days=7)
 

@@ -18,7 +18,19 @@ def register_action_routes(app: FastAPI):
 
     @app.post("/contacts/{contact_id}/relationship-actions", response_model=RelationshipActionResponse, status_code=status.HTTP_201_CREATED)
     def create_relationship_action(contact_id: str, action: RelationshipActionCreate, db: Session = Depends(get_db)):
-        """Créer une nouvelle action de suivi pour un contact"""
+        """
+        Create a new relationship action (task/reminder) for a contact.
+        
+        Actions represent tasks or reminders to be completed with a contact. They have status, priority, and optional due date.
+        
+        **Parameters:**
+        - contact_id: UUID of the contact
+        - action: Action data (type, priority, status, optional due_date)
+        
+        **Responses:**
+        - 201: Action created successfully
+        - 404: Contact not found
+        """
         # Vérifier que le contact existe
         contact = db.query(ContactDB).filter(ContactDB.id == contact_id).first()
         if not contact:
@@ -39,14 +51,29 @@ def register_action_routes(app: FastAPI):
 
     @app.get("/relationship-actions")
     def list_relationship_actions(
-        skip: int = Query(0, ge=0),
-        limit: int = Query(100, ge=1, le=1000),
-        status_filter: str = Query(None, alias="status"),
-        priority_filter: str = Query(None, alias="priority"),
-        contact_id: str = Query(None),
+        skip: int = Query(0, ge=0, description="Number of records to skip for pagination"),
+        limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return (max 1000)"),
+        status_filter: str = Query(None, alias="status", description="Filter by action status (todo, in_progress, completed, cancelled)"),
+        priority_filter: str = Query(None, alias="priority", description="Filter by priority (low, medium, high)"),
+        contact_id: str = Query(None, description="Filter by contact UUID"),
         db: Session = Depends(get_db)
     ):
-        """Lister toutes les actions de suivi avec filtres et pagination"""
+        """
+        List all relationship actions with optional filtering and pagination.
+        
+        Returns a paginated list of all actions. Supports filtering by status, priority, and/or contact.
+        
+        **Parameters:**
+        - skip: Number of records to skip (default 0)
+        - limit: Maximum records to return (default 100, max 1000)
+        - status: Filter by status (todo, in_progress, completed, cancelled)
+        - priority: Filter by priority (low, medium, high)
+        - contact_id: Filter by contact UUID
+        
+        **Responses:**
+        - 200: Actions list returned with pagination metadata
+        - 400: Invalid filter values
+        """
         query = db.query(RelationshipActionDB)
 
         # Filtrer par statut si fourni
@@ -90,11 +117,23 @@ def register_action_routes(app: FastAPI):
 
     @app.get("/relationship-actions/due")
     def list_due_relationship_actions(
-        skip: int = Query(0, ge=0),
-        limit: int = Query(100, ge=1, le=1000),
+        skip: int = Query(0, ge=0, description="Number of records to skip for pagination"),
+        limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return (max 1000)"),
         db: Session = Depends(get_db)
     ):
-        """Lister les actions dues aujourd'hui et en retard"""
+        """
+        List actions that are due today or overdue.
+        
+        Returns actions with status 'todo' or 'in_progress' that have a due date on or before today.
+        Includes metadata about due_today and overdue counts.
+        
+        **Parameters:**
+        - skip: Number of records to skip (default 0)
+        - limit: Maximum records to return (default 100, max 1000)
+        
+        **Responses:**
+        - 200: List of due/overdue actions with detailed count information
+        """
         today = date.today()
 
         # Query for actions due today or overdue AND not completed/cancelled
@@ -138,7 +177,20 @@ def register_action_routes(app: FastAPI):
 
     @app.patch("/relationship-actions/{action_id}", response_model=RelationshipActionResponse)
     def update_relationship_action(action_id: str, action_update: RelationshipActionUpdate, db: Session = Depends(get_db)):
-        """Mettre à jour une action de suivi"""
+        """
+        Update a relationship action.
+        
+        All fields are optional. Only provided fields will be updated. Allows partial updates.
+        
+        **Parameters:**
+        - action_id: UUID of the action to update
+        - action_update: Fields to update (all optional)
+        
+        **Responses:**
+        - 200: Action updated successfully
+        - 404: Action not found
+        - 400: Invalid field values
+        """
         db_action = db.query(RelationshipActionDB).filter(RelationshipActionDB.id == action_id).first()
         if not db_action:
             raise HTTPException(
@@ -159,7 +211,18 @@ def register_action_routes(app: FastAPI):
 
     @app.patch("/relationship-actions/{action_id}/complete", response_model=RelationshipActionResponse)
     def complete_relationship_action(action_id: str, db: Session = Depends(get_db)):
-        """Marquer une action comme terminée"""
+        """
+        Mark a relationship action as completed.
+        
+        Sets the action status to 'completed' and records the completion timestamp.
+        
+        **Parameters:**
+        - action_id: UUID of the action to mark complete
+        
+        **Responses:**
+        - 200: Action marked as completed
+        - 404: Action not found
+        """
         db_action = db.query(RelationshipActionDB).filter(RelationshipActionDB.id == action_id).first()
         if not db_action:
             raise HTTPException(
