@@ -9,6 +9,7 @@ Run against a real PostgreSQL database:
 import pytest
 import requests
 import time
+import uuid
 from datetime import datetime, timedelta
 
 BASE_URL = "http://localhost:8000"
@@ -37,12 +38,12 @@ def create_test_contact():
     contact_ids = []
     
     def _create(nom="Test", email="test@example.com", **kwargs):
-        email = f"{len(contact_ids)}_" + email
+        unique_email = f"{uuid.uuid4().hex[:8]}_" + email
         response = requests.post(
             f"{BASE_URL}/contacts",
             json={
                 "nom": nom,
-                "email": email,
+                "email": unique_email,
                 **kwargs
             }
         )
