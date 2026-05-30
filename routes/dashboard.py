@@ -42,7 +42,7 @@ class DashboardResponse(BaseModel):
 def register_dashboard_routes(app: FastAPI):
     """Register dashboard endpoints"""
 
-    @app.get("/rap/dashboard", response_model=DashboardResponse)
+    @app.get("/rap/dashboard", response_model=DashboardResponse, tags=["Dashboard"])
     def get_dashboard(db: Session = Depends(get_db)):
         """
         Get RAP system dashboard with aggregated metrics.

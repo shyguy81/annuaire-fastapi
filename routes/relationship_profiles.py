@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 def register_relationship_profile_routes(app: FastAPI):
     """Register all relationship profile endpoints"""
 
-    @app.post("/contacts/{contact_id}/relationship-profile", response_model=RelationshipProfileResponse, status_code=status.HTTP_201_CREATED)
+    @app.post("/contacts/{contact_id}/relationship-profile", response_model=RelationshipProfileResponse, status_code=status.HTTP_201_CREATED, tags=["Relationship Profiles"])
     def create_relationship_profile(contact_id: str, profile: RelationshipProfileCreate, db: Session = Depends(get_db)):
         """
         Create a relationship profile for a contact.
@@ -60,7 +60,7 @@ def register_relationship_profile_routes(app: FastAPI):
         logger.info(f"Profil de relation créé: {db_profile.id} pour contact {contact_id}")
         return db_profile
 
-    @app.get("/contacts/{contact_id}/relationship-profile", response_model=RelationshipProfileResponse)
+    @app.get("/contacts/{contact_id}/relationship-profile", response_model=RelationshipProfileResponse, tags=["Relationship Profiles"])
     def get_relationship_profile(contact_id: str, db: Session = Depends(get_db)):
         """
         Retrieve the relationship profile for a contact.
@@ -82,7 +82,7 @@ def register_relationship_profile_routes(app: FastAPI):
             )
         return profile
 
-    @app.patch("/contacts/{contact_id}/relationship-profile", response_model=RelationshipProfileResponse)
+    @app.patch("/contacts/{contact_id}/relationship-profile", response_model=RelationshipProfileResponse, tags=["Relationship Profiles"])
     def update_relationship_profile(contact_id: str, profile_update: RelationshipProfileUpdate, db: Session = Depends(get_db)):
         """
         Update the relationship profile for a contact.

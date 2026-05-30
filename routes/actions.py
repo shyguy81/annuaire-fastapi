@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def register_action_routes(app: FastAPI):
     """Register all relationship action endpoints"""
 
-    @app.post("/contacts/{contact_id}/relationship-actions", response_model=RelationshipActionResponse, status_code=status.HTTP_201_CREATED)
+    @app.post("/contacts/{contact_id}/relationship-actions", response_model=RelationshipActionResponse, status_code=status.HTTP_201_CREATED, tags=["Actions"])
     def create_relationship_action(contact_id: str, action: RelationshipActionCreate, db: Session = Depends(get_db)):
         """
         Create a new relationship action (task/reminder) for a contact.
@@ -49,7 +49,7 @@ def register_action_routes(app: FastAPI):
         logger.info(f"Action de suivi créée: {db_action.id} pour contact {contact_id}")
         return db_action
 
-    @app.get("/relationship-actions")
+    @app.get("/relationship-actions", tags=["Actions"])
     def list_relationship_actions(
         skip: int = Query(0, ge=0, description="Number of records to skip for pagination"),
         limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return (max 1000)"),
@@ -115,7 +115,7 @@ def register_action_routes(app: FastAPI):
             "limit": limit
         }
 
-    @app.get("/relationship-actions/due")
+    @app.get("/relationship-actions/due", tags=["Actions"])
     def list_due_relationship_actions(
         skip: int = Query(0, ge=0, description="Number of records to skip for pagination"),
         limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return (max 1000)"),
@@ -175,7 +175,7 @@ def register_action_routes(app: FastAPI):
             "limit": limit
         }
 
-    @app.patch("/relationship-actions/{action_id}", response_model=RelationshipActionResponse)
+    @app.patch("/relationship-actions/{action_id}", response_model=RelationshipActionResponse, tags=["Actions"])
     def update_relationship_action(action_id: str, action_update: RelationshipActionUpdate, db: Session = Depends(get_db)):
         """
         Update a relationship action.

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def register_interaction_routes(app: FastAPI):
     """Register all interaction endpoints"""
 
-    @app.post("/contacts/{contact_id}/interactions", response_model=InteractionResponse, status_code=status.HTTP_201_CREATED)
+    @app.post("/contacts/{contact_id}/interactions", response_model=InteractionResponse, status_code=status.HTTP_201_CREATED, tags=["Interactions"])
     def create_interaction(contact_id: str, interaction: InteractionCreate, db: Session = Depends(get_db)):
         """
         Create a new interaction record for a contact.
@@ -49,7 +49,7 @@ def register_interaction_routes(app: FastAPI):
         logger.info(f"Interaction créée: {db_interaction.id} pour contact {contact_id}")
         return db_interaction
 
-    @app.get("/contacts/{contact_id}/interactions")
+    @app.get("/contacts/{contact_id}/interactions", tags=["Interactions"])
     def list_interactions(
         contact_id: str,
         skip: int = Query(0, ge=0, description="Number of records to skip for pagination"),
