@@ -1,7 +1,10 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database import init_db, get_db
-from models import ContactDB, ContactCreate, ContactUpdate, ContactResponse
+from models import (
+    ContactDB, ContactCreate, ContactUpdate, ContactResponse,
+    RelationshipProfileDB, RelationshipProfileCreate, RelationshipProfileUpdate, RelationshipProfileResponse
+)
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -118,3 +121,90 @@ def search_contacts(query: str, db: Session = Depends(get_db)):
         (ContactDB.organisation.ilike(f"%{query}%"))
     ).all()
     return results
+
+
+# ===== RELATIONSHIP PROFILE ENDPOINTS =====
+
+@app.post("/contacts/{contact_id}/relationship-profile", response_model=RelationshipProfileResponse, status_code=status.HTTP_201_CREATED)
+def create_relationship_profile(contact_id: str, profile: RelationshipProfileCreate, db: Session = Depends(get_db)):
+    """Créer un profil relationnel pour un contact"""
+    # Vérifier que le contact existe
+    contact = db.query(ContactDB).filter(ContactDB.id == contact_id).first()
+    if not contact:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Contact {contact_id} non trouvé"
+        )
+    
+    # Vérifier qu'un seul profil par contact
+    existing_profile = db.query(RelationshipProfileDB).filter(
+        RelationshipProfileDB.contact_id == contact_id
+    ).first()
+    if existing_profile:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Contact {contact_id} a déjà un profil relationnel"
+        )
+    
+    # Valider trust_level
+    if profile.trust_level < 1 or profile.trust_level > 5:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="trust_level doit être entre 1 et 5"
+        )
+    
+    db_profile = RelationshipProfileDB(
+        contact_id=contact_id,
+        **profile.model_dump()
+    )
+    db.add(db_profile)
+    db.commit()
+    db.refresh(db_profile)
+    logger.info(f"Profil relationnel créé: {db_profile.id} pour contact {contact_id}")
+    return db_profile
+
+
+@app.get("/contacts/{contact_id}/relationship-profile", response_model=RelationshipProfileResponse)
+def get_relationship_profile(contact_id: str, db: Session = Depends(get_db)):
+    """Récupérer le profil relationnel d'un contact"""
+    profile = db.query(RelationshipProfileDB).filter(
+        RelationshipProfileDB.contact_id == contact_id
+    ).first()
+    if not profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Profil relationnel non trouvé pour contact {contact_id}"
+        )
+    return profile
+
+
+@app.patch("/contacts/{contact_id}/relationship-profile", response_model=RelationshipProfileResponse)
+def update_relationship_profile(contact_id: str, profile_update: RelationshipProfileUpdate, db: Session = Depends(get_db)):
+    """Mettre à jour le profil relationnel d'un contact"""
+    db_profile = db.query(RelationshipProfileDB).filter(
+        RelationshipProfileDB.contact_id == contact_id
+    ).first()
+    if not db_profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Profil relationnel non trouvé pour contact {contact_id}"
+        )
+    
+    # Valider trust_level si fourni
+    update_data = profile_update.model_dump(exclude_unset=True)
+    if 'trust_level' in update_data and update_data['trust_level'] is not None:
+        if update_data['trust_level'] < 1 or update_data['trust_level'] > 5:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="trust_level doit être entre 1 et 5"
+            )
+    
+    for field, value in update_data.items():
+        if value is not None:
+            setattr(db_profile, field, value)
+    
+    db.add(db_profile)
+    db.commit()
+    db.refresh(db_profile)
+    logger.info(f"Profil relationnel mis à jour: {db_profile.id} pour contact {contact_id}")
+    return db_profile

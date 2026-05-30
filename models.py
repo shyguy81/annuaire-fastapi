@@ -87,10 +87,10 @@ class RelationshipProfileDB(Base):
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     contact_id = Column(String(36), ForeignKey("contacts.id", ondelete="CASCADE"), nullable=False, index=True)
-    relationship_type = Column(SQLEnum(RelationshipType), nullable=False)
-    proximity_level = Column(SQLEnum(ProximityLevel), nullable=False)
+    relationship_type = Column(SQLEnum(RelationshipType, native_enum=False), nullable=False)
+    proximity_level = Column(SQLEnum(ProximityLevel, native_enum=False), nullable=False)
     trust_level = Column(Integer, nullable=False)
-    business_potential = Column(SQLEnum(BusinessPotential), nullable=False)
+    business_potential = Column(SQLEnum(BusinessPotential, native_enum=False), nullable=False)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
@@ -106,7 +106,7 @@ class InteractionDB(Base):
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     contact_id = Column(String(36), ForeignKey("contacts.id", ondelete="CASCADE"), nullable=False, index=True)
-    interaction_type = Column(SQLEnum(InteractionType), nullable=False)
+    interaction_type = Column(SQLEnum(InteractionType, native_enum=False), nullable=False)
     interaction_date = Column(DateTime, nullable=False, default=func.now())
     notes = Column(String(1000), nullable=True)
     created_at = Column(DateTime, default=func.now())
@@ -120,9 +120,9 @@ class RelationshipActionDB(Base):
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     contact_id = Column(String(36), ForeignKey("contacts.id", ondelete="CASCADE"), nullable=False, index=True)
-    action_type = Column(SQLEnum(ActionType), nullable=False)
-    priority = Column(SQLEnum(Priority), nullable=False)
-    status = Column(SQLEnum(ActionStatus), nullable=False)
+    action_type = Column(SQLEnum(ActionType, native_enum=False), nullable=False)
+    priority = Column(SQLEnum(Priority, native_enum=False), nullable=False)
+    status = Column(SQLEnum(ActionStatus, native_enum=False), nullable=False)
     due_date = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=func.now())
