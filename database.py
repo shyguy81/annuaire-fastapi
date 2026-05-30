@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base
 
-DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://annuaire_user:annuaire_password@localhost:3306/annuaire_contacts")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://annuaire_user:annuaire_password@localhost:5432/annuaire_contacts")
 
 engine = create_engine(
     DATABASE_URL,

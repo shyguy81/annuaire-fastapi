@@ -2,9 +2,9 @@
 
 ## Project Overview
 
-FastAPI REST API for managing contacts with MariaDB persistence. Minimal CRUD service with search capabilities.
+FastAPI REST API for managing contacts with PostgreSQL persistence. Minimal CRUD service with search capabilities.
 
-**Stack**: FastAPI + SQLAlchemy + MariaDB + Docker Compose  
+**Stack**: FastAPI + SQLAlchemy + PostgreSQL 15 + Docker Compose  
 **Default port**: 8000  
 **Swagger UI**: `http://localhost:8000/docs` (auto-enabled)
 
@@ -24,7 +24,7 @@ models.py        → ORM models (SQLAlchemy) + API schemas (Pydantic)
 
 ### Database Structure
 
-MariaDB (via Docker Compose) with single `contacts` table:
+PostgreSQL 15 (via Docker Compose) with single `contacts` table:
 ```
 id (UUID PK) | nom | email (UNIQUE) | telephone | adresse | organisation | tags (JSON) | created_at | updated_at
 ```
@@ -85,7 +85,7 @@ db.query(ContactDB).filter(
 ```bash
 docker-compose up --build
 ```
-- MariaDB initializes on first run (credentials via environment variables)
+- PostgreSQL initializes on first run (credentials via environment variables)
 - Backend auto-connects and creates schema via `init_db()` on startup
 - Run with `--reload` flag enables auto-restart on code changes
 
@@ -105,10 +105,10 @@ Currently using SQLAlchemy's `metadata.create_all()` (not Alembic).
 
 ### Environment Variables (docker-compose.yml)
 ```
-DATABASE_URL=mysql+pymysql://annuaire_user:annuaire_password@mariadb:3306/annuaire_contacts
+DATABASE_URL=postgresql+psycopg2://annuaire_user:annuaire_password@postgres:5432/annuaire_contacts
 ```
-- Connection string uses **PyMySQL** driver (see `requirements.txt`)
-- MariaDB health check prevents backend startup until DB is ready
+- Connection string uses **psycopg2** driver (see `requirements.txt`)
+- PostgreSQL health check prevents backend startup until DB is ready
 
 ### Local Development (.env)
 Copy from `.env.example` and update `DATABASE_URL` for local testing without Docker
@@ -144,7 +144,7 @@ Copy from `.env.example` and update `DATABASE_URL` for local testing without Doc
 | `fastapi` | Web framework + auto-generated Swagger UI |
 | `sqlalchemy` | ORM for database queries |
 | `pydantic` | Request/response validation + serialization |
-| `pymysql` | MySQL/MariaDB connection driver |
+| `psycopg2-binary` | PostgreSQL connection driver |
 | `uvicorn` | ASGI server (production-ready) |
 
 See `requirements.txt` for versions and additional dependencies.
