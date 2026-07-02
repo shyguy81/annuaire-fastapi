@@ -36,7 +36,7 @@ tags_metadata = [
 
 app = FastAPI(
     title="Annuaire Contacts API",
-    version="0.0.8",
+    version="0.0.9",
     openapi_tags=tags_metadata,
     swagger_ui_parameters={"docExpansion": "list"}  # Collapse sections by default
 )
