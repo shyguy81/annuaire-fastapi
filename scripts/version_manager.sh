@@ -130,7 +130,8 @@ case "$1" in
         ;;
     "sync")
         current_version=$(read_version)
-        echo "Synchronisation terminée avec la version: $current_version"
+        sed -i "s/version=\"[0-9]*\.[0-9]*\.[0-9]*\"/version=\"${current_version}\"/" main.py
+        echo "Synchronisation terminée avec la version: $current_version (main.py mis à jour)"
         ;;
     "tag")
         if [[ "$2" == "create" ]]; then
