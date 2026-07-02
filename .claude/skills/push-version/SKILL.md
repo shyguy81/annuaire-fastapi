@@ -31,9 +31,9 @@ scripts/version_manager.sh tag create      # Crée + push le tag git
 
 1. **Vérification** : `git status` clean + pas de commits en attente de push
 2. **Bump version** : `scripts/version_manager.sh <major|minor|patch>` — met à jour `VERSION`
-3. **Sync `main.py`** : mettre à jour manuellement `version="X.Y.Z"` dans l'init `FastAPI` (main.py:39) — le script ne le fait pas automatiquement
+3. **Sync `main.py`** : `scripts/version_manager.sh sync` — met à jour `version="X.Y.Z"` dans l'init `FastAPI` (main.py:39)
 4. **Git commit** : `git commit -m "chore: bump version to X.Y.Z"`
-5. **Git push** : `git push origin master`
+5. **Git push** : `git push origin main`
 6. **Tag + push** : `scripts/version_manager.sh tag create` (crée `vX.Y.Z` et push sur origin)
 7. **Trigger workflow** : GitHub Actions déclenché automatiquement sur le push du tag
 
@@ -51,7 +51,7 @@ Monitor: `gh run list` / `gh run watch` ou https://github.com/shyguy81/annuaire-
 ## Fichiers modifiés
 
 - `VERSION` : source de vérité de la version courante
-- `main.py` : `version="X.Y.Z"` dans l'init FastAPI (ligne ~39) — à mettre à jour à la main
+- `main.py` : `version="X.Y.Z"` dans l'init FastAPI (ligne ~39) — mis à jour par `scripts/version_manager.sh sync`
 
 ## Rollback
 
@@ -97,7 +97,7 @@ git commit -m "..."
 
 ```bash
 git log --oneline -5
-git push origin master
+git push origin main
 ```
 
 ### Workflow GitHub Actions fail
