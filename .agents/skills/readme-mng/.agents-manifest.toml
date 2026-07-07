@@ -1,0 +1,5 @@
+schema_version = 1
+kind = "instance"
+name = "readme-mng"
+description = "Manage README file (Root Folder). Generate, update, and maintain project documentation with clarity and consistency pour FOOD CHOICE (current project)."
+template_name = "readme-mng"
